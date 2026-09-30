@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import styles from "./page.module.css";
 import {
   DEFAULT_FIELD,
   SAMPLE_JSON,
@@ -9,25 +10,17 @@ import {
   parseJson,
 } from "./privileges";
 
-const boxStyle = {
-  width: "100%",
-  fontFamily: "monospace",
-  fontSize: 14,
-  padding: 8,
-  boxSizing: "border-box",
-} as const;
-
 export default function CutPrivilegePage() {
   const [jsonText, setJsonText] = useState(
     JSON.stringify(SAMPLE_JSON, null, 2),
   );
   const [codes, setCodes] = useState("");
-  const [key, setKey] = useState(DEFAULT_FIELD);
+  const [field, setField] = useState(DEFAULT_FIELD);
   const [copied, setCopied] = useState(false);
 
   const parsed = parseJson(jsonText);
   const output = parsed.ok
-    ? JSON.stringify(cutPrivileges(parsed.data, codes, key), null, 2)
+    ? JSON.stringify(cutPrivileges(parsed.data, codes, field), null, 2)
     : "";
 
   async function copy() {
@@ -37,47 +30,58 @@ export default function CutPrivilegePage() {
   }
 
   return (
-    <main style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 720 }}>
-      <Link href="/">← All tools</Link>
-      <h1>Cut Privilege</h1>
+    <main className={styles.page}>
+      <div>
+        <Link href="/">← All tools</Link>
+        <h1 style={{ margin: "4px 0 0" }}>Cut Privilege</h1>
+      </div>
 
-      <h3>1. JSON ต้นฉบับ</h3>
-      <textarea
-        value={jsonText}
-        onChange={(e) => setJsonText(e.target.value)}
-        rows={10}
-        style={boxStyle}
-      />
-      {!parsed.ok && <p style={{ color: "crimson" }}>{parsed.error}</p>}
-      <label style={{ display: "block", marginTop: 8 }}>
-        Field ที่ใช้เทียบ:{" "}
-        <input
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-          style={{ padding: 4, width: 160 }}
-        />
-      </label>
-      <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0" }}>
-        ค้นหาทุกชั้นของ JSON อัตโนมัติ · field ซ้อนใช้จุด เช่น <code>info.code</code>
-      </p>
+      <div className={styles.grid}>
+        <section className={`${styles.panel} ${styles.source}`}>
+          <h3>JSON ต้นฉบับ</h3>
+          <textarea
+            className={styles.box}
+            value={jsonText}
+            onChange={(e) => setJsonText(e.target.value)}
+            spellCheck={false}
+          />
+          {!parsed.ok && <p className={styles.error}>{parsed.error}</p>}
+        </section>
 
-      <h3>2. Privilege ที่ต้องการตัดออก (คั่นด้วย , )</h3>
-      <input
-        value={codes}
-        onChange={(e) => setCodes(e.target.value)}
-        placeholder="A,B"
-        style={boxStyle}
-      />
+        <section className={`${styles.panel} ${styles.remove}`}>
+          <h3>
+            Privilege ที่ต้องการตัดออก
+            <span className={styles.hint}>
+              เทียบกับ field{" "}
+              <input
+                value={field}
+                onChange={(e) => setField(e.target.value)}
+                style={{ width: 80, padding: 2 }}
+              />
+            </span>
+          </h3>
+          <input
+            className={styles.input}
+            value={codes}
+            onChange={(e) => setCodes(e.target.value)}
+            placeholder="A,B (คั่นด้วย ,)"
+          />
+        </section>
 
-      <h3>3. ผลลัพธ์</h3>
-      <textarea value={output} readOnly rows={10} style={boxStyle} />
-      <button
-        onClick={copy}
-        disabled={!parsed.ok}
-        style={{ marginTop: 8, padding: "6px 16px" }}
-      >
-        {copied ? "Copied!" : "Copy"}
-      </button>
+        <section className={`${styles.panel} ${styles.result}`}>
+          <h3>
+            ผลลัพธ์
+            <button
+              onClick={copy}
+              disabled={!parsed.ok}
+              style={{ padding: "4px 16px" }}
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </h3>
+          <textarea className={styles.box} value={output} readOnly />
+        </section>
+      </div>
     </main>
   );
 }

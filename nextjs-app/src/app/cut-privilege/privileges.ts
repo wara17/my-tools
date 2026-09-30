@@ -6,12 +6,12 @@ export type Json =
   | Json[]
   | { [key: string]: Json };
 
-export const DEFAULT_FIELD = "code";
+export const DEFAULT_FIELD = "id";
 
 // ตัวอย่าง JSON เริ่มต้น
 export const SAMPLE_JSON: Json = [
-  { code: "A", desc: "AA" },
-  { code: "B", desc: "BB" },
+  { id: "A", desc: "a desc" },
+  { id: "B", desc: "b desc" },
 ];
 
 // แยก input เช่น "A, b" เป็น Set ของ code (ไม่สนตัวพิมพ์เล็ก/ใหญ่)

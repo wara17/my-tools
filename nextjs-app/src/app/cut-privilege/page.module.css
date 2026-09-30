@@ -1,0 +1,81 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100vh;
+  padding: 16px 24px;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "source remove"
+    "source result";
+  gap: 16px;
+}
+
+.source { grid-area: source; }
+.remove { grid-area: remove; }
+.result { grid-area: result; }
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.panel h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.box {
+  flex: 1;
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 14px;
+  resize: none;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.hint {
+  font-size: 13px;
+  color: #666;
+  font-weight: normal;
+}
+
+.error {
+  color: crimson;
+  margin: 0;
+}
+
+/* จอแคบ: เรียงเป็นแนวตั้ง */
+@media (max-width: 768px) {
+  .page { height: auto; }
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "source" "remove" "result";
+  }
+  .box { min-height: 240px; }
+}
