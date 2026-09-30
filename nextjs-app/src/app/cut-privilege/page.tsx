@@ -2,32 +2,79 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { PRIVILEGES, cutPrivileges } from "./privileges";
+import {
+  DEFAULT_KEY,
+  SAMPLE_PRIVILEGES,
+  cutPrivileges,
+  parsePrivileges,
+} from "./privileges";
+
+const boxStyle = {
+  width: "100%",
+  fontFamily: "monospace",
+  fontSize: 14,
+  padding: 8,
+  boxSizing: "border-box",
+} as const;
 
 export default function CutPrivilegePage() {
-  const [input, setInput] = useState("");
-  const result = cutPrivileges(input);
+  const [jsonText, setJsonText] = useState(
+    JSON.stringify(SAMPLE_PRIVILEGES, null, 2),
+  );
+  const [codes, setCodes] = useState("");
+  const [key, setKey] = useState(DEFAULT_KEY);
+  const [copied, setCopied] = useState(false);
+
+  const parsed = parsePrivileges(jsonText);
+  const output = parsed.ok
+    ? JSON.stringify(cutPrivileges(parsed.data, codes, key), null, 2)
+    : "";
+
+  async function copy() {
+    await navigator.clipboard.writeText(output);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
 
   return (
-    <main style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 640 }}>
+    <main style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 720 }}>
       <Link href="/">← All tools</Link>
       <h1>Cut Privilege</h1>
 
-      <h3>JSON หลัก</h3>
-      <pre>{JSON.stringify(PRIVILEGES, null, 2)}</pre>
-
-      <label>
-        Code ที่ต้องการตัด (คั่นด้วย , เช่น A,B):{" "}
+      <h3>1. JSON ต้นฉบับ</h3>
+      <textarea
+        value={jsonText}
+        onChange={(e) => setJsonText(e.target.value)}
+        rows={10}
+        style={boxStyle}
+      />
+      {!parsed.ok && <p style={{ color: "crimson" }}>{parsed.error}</p>}
+      <label style={{ display: "block", marginTop: 8 }}>
+        Field ที่ใช้เทียบ:{" "}
         <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="A,B"
-          style={{ padding: 4 }}
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          style={{ padding: 4, width: 120 }}
         />
       </label>
 
-      <h3>ผลลัพธ์</h3>
-      <pre>{JSON.stringify(result, null, 2)}</pre>
+      <h3>2. Privilege ที่ต้องการตัดออก (คั่นด้วย , )</h3>
+      <input
+        value={codes}
+        onChange={(e) => setCodes(e.target.value)}
+        placeholder="A,B"
+        style={boxStyle}
+      />
+
+      <h3>3. ผลลัพธ์</h3>
+      <textarea value={output} readOnly rows={10} style={boxStyle} />
+      <button
+        onClick={copy}
+        disabled={!parsed.ok}
+        style={{ marginTop: 8, padding: "6px 16px" }}
+      >
+        {copied ? "Copied!" : "Copy"}
+      </button>
     </main>
   );
 }
