@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { PRIVILEGES, cutPrivileges } from "./privileges";
 
@@ -9,6 +10,7 @@ export default function CutPrivilegePage() {
 
   return (
     <main style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 640 }}>
+      <Link href="/">← All tools</Link>
       <h1>Cut Privilege</h1>
 
       <h3>JSON หลัก</h3>
