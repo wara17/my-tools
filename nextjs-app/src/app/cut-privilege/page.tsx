@@ -60,11 +60,13 @@ export default function CutPrivilegePage() {
               />
             </span>
           </h3>
-          <input
+          <textarea
             className={styles.input}
+            rows={5}
             value={codes}
             onChange={(e) => setCodes(e.target.value)}
-            placeholder="A,B (คั่นด้วย ,)"
+            placeholder={"A,B\nหรือ 1 บรรทัดต่อ 1 ตัว"}
+            spellCheck={false}
           />
         </section>
 

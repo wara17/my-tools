@@ -14,11 +14,11 @@ export const SAMPLE_JSON: Json = [
   { id: "B", desc: "b desc" },
 ];
 
-// แยก input เช่น "A, b" เป็น Set ของ code (ไม่สนตัวพิมพ์เล็ก/ใหญ่)
+// แยก input เช่น "A, b" หรือแยกบรรทัด เป็น Set ของ code (ไม่สนตัวพิมพ์เล็ก/ใหญ่)
 export function parseCodes(input: string): Set<string> {
   return new Set(
     input
-      .split(",")
+      .split(/[,\n]/)
       .map((c) => c.trim().toUpperCase())
       .filter(Boolean),
   );
