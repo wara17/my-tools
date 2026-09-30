@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import {
-  DEFAULT_KEY,
-  SAMPLE_PRIVILEGES,
+  DEFAULT_FIELD,
+  SAMPLE_JSON,
   cutPrivileges,
-  parsePrivileges,
+  parseJson,
 } from "./privileges";
 
 const boxStyle = {
@@ -19,13 +19,13 @@ const boxStyle = {
 
 export default function CutPrivilegePage() {
   const [jsonText, setJsonText] = useState(
-    JSON.stringify(SAMPLE_PRIVILEGES, null, 2),
+    JSON.stringify(SAMPLE_JSON, null, 2),
   );
   const [codes, setCodes] = useState("");
-  const [key, setKey] = useState(DEFAULT_KEY);
+  const [key, setKey] = useState(DEFAULT_FIELD);
   const [copied, setCopied] = useState(false);
 
-  const parsed = parsePrivileges(jsonText);
+  const parsed = parseJson(jsonText);
   const output = parsed.ok
     ? JSON.stringify(cutPrivileges(parsed.data, codes, key), null, 2)
     : "";
@@ -54,9 +54,12 @@ export default function CutPrivilegePage() {
         <input
           value={key}
           onChange={(e) => setKey(e.target.value)}
-          style={{ padding: 4, width: 120 }}
+          style={{ padding: 4, width: 160 }}
         />
       </label>
+      <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0" }}>
+        ค้นหาทุกชั้นของ JSON อัตโนมัติ · field ซ้อนใช้จุด เช่น <code>info.code</code>
+      </p>
 
       <h3>2. Privilege ที่ต้องการตัดออก (คั่นด้วย , )</h3>
       <input

@@ -1,9 +1,15 @@
-export type Privilege = Record<string, unknown>;
+export type Json =
+  | null
+  | boolean
+  | number
+  | string
+  | Json[]
+  | { [key: string]: Json };
 
-export const DEFAULT_KEY = "code";
+export const DEFAULT_FIELD = "code";
 
 // ตัวอย่าง JSON เริ่มต้น
-export const SAMPLE_PRIVILEGES: Privilege[] = [
+export const SAMPLE_JSON: Json = [
   { code: "A", desc: "AA" },
   { code: "B", desc: "BB" },
 ];
@@ -18,36 +24,62 @@ export function parseCodes(input: string): Set<string> {
   );
 }
 
-// ตัด item ที่ค่าใน field `key` ตรงกับ codes ออก — field อื่นใน object เก็บไว้ตามเดิม
-export function cutPrivileges(
-  source: Privilege[],
-  input: string,
-  key: string = DEFAULT_KEY,
-): Privilege[] {
-  const codes = parseCodes(input);
-  return source.filter(
-    (p) => !codes.has(String(p[key] ?? "").toUpperCase()),
-  );
+function isObject(v: Json): v is { [key: string]: Json } {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
 }
 
-// แปลงข้อความ JSON เป็น array ของ object พร้อมข้อความ error ที่อ่านง่าย
-export function parsePrivileges(
+// อ่านค่าตาม path แบบจุด เช่น "info.code"
+function getByPath(obj: { [key: string]: Json }, path: string): Json | undefined {
+  let cur: Json | undefined = obj;
+  for (const part of path.split(".")) {
+    if (cur === undefined || !isObject(cur)) return undefined;
+    cur = cur[part];
+  }
+  return cur;
+}
+
+function matches(item: Json, codes: Set<string>, field: string): boolean {
+  // array ของ string/number เช่น ["A","B"]
+  if (typeof item === "string" || typeof item === "number") {
+    return codes.has(String(item).toUpperCase());
+  }
+  if (isObject(item)) {
+    const value = getByPath(item, field);
+    return (
+      (typeof value === "string" || typeof value === "number") &&
+      codes.has(String(value).toUpperCase())
+    );
+  }
+  return false;
+}
+
+// ไล่ทุกชั้นของ JSON: ในทุก array ตัด item ที่ `field` ตรงกับ code ออก
+// โครงสร้างและ field อื่นทั้งหมดคงไว้ตามเดิม
+export function cutPrivileges(json: Json, input: string, field = DEFAULT_FIELD): Json {
+  const codes = parseCodes(input);
+  const path = field.trim() || DEFAULT_FIELD;
+
+  const walk = (node: Json): Json => {
+    if (Array.isArray(node)) {
+      return node.filter((item) => !matches(item, codes, path)).map(walk);
+    }
+    if (isObject(node)) {
+      return Object.fromEntries(
+        Object.entries(node).map(([k, v]) => [k, walk(v)]),
+      );
+    }
+    return node;
+  };
+
+  return codes.size === 0 ? json : walk(json);
+}
+
+export function parseJson(
   text: string,
-): { ok: true; data: Privilege[] } | { ok: false; error: string } {
-  let data: unknown;
+): { ok: true; data: Json } | { ok: false; error: string } {
   try {
-    data = JSON.parse(text);
+    return { ok: true, data: JSON.parse(text) as Json };
   } catch (e) {
     return { ok: false, error: `JSON ไม่ถูกต้อง: ${(e as Error).message}` };
   }
-  if (
-    !Array.isArray(data) ||
-    !data.every((p) => p !== null && typeof p === "object" && !Array.isArray(p))
-  ) {
-    return {
-      ok: false,
-      error: 'JSON ต้องเป็น array ของ object เช่น [{"code":"A"}]',
-    };
-  }
-  return { ok: true, data: data as Privilege[] };
 }
